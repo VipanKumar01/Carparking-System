@@ -82,7 +82,7 @@ export const signOut = async () => {
 // Parking slots functions
 export const getParkingStatus = async () => {
   try {
-    const docRef = doc(db, "parking_logs", "current_status");
+    const docRef = doc(db, "parking_logs", "current_state");
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
@@ -106,7 +106,7 @@ export const bookParkingSlot = async (
 ) => {
   try {
     // Get current status
-    const statusRef = doc(db, "parking_logs", "current_status");
+    const statusRef = doc(db, "parking_logs", "current_state");
     const statusSnap = await getDoc(statusRef);
 
     if (!statusSnap.exists()) {
@@ -183,7 +183,7 @@ export const exitParkingSlot = async (bookingId: string) => {
     });
 
     // Update parking status
-    const statusRef = doc(db, "parking_logs", "current_status");
+    const statusRef = doc(db, "parking_logs", "current_state");
     const statusSnap = await getDoc(statusRef);
 
     if (statusSnap.exists()) {
