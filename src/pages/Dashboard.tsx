@@ -32,6 +32,22 @@ const Dashboard = () => {
     }
   }, [isAuthenticated, navigate, isLoading]);
 
+  const formatTimestamp = (timestamp: any) => {
+    if (!timestamp) return 'N/A';
+
+    // If it's a Firebase server timestamp object
+    if (typeof timestamp === 'object' && timestamp.hasOwnProperty('seconds')) {
+      return new Date(timestamp.seconds * 1000).toLocaleString();
+    }
+
+    // If it's a regular timestamp number
+    if (typeof timestamp === 'number') {
+      return new Date(timestamp).toLocaleString();
+    }
+
+    return 'N/A';
+  };
+
   const fetchData = async () => {
     if (!currentUser) return;
 
@@ -43,7 +59,7 @@ const Dashboard = () => {
 
       if (activeResult.success) {
         setActiveBooking(activeResult.data);
-      } else {
+      } else if (activeResult.error) {
         toast({
           title: 'Error',
           description: activeResult.error,
@@ -57,8 +73,12 @@ const Dashboard = () => {
       if (historyResult.success) {
         // Filter out active bookings and sort by entry time descending
         const history = historyResult.data
-          .filter(booking => booking.status !== 'active')
-          .sort((a, b) => b.entryTime.toDate() - a.entryTime.toDate());
+          .filter((booking: any) => booking.status !== 'active')
+          .sort((a: any, b: any) => {
+            const aTime = a.entryTime || 0;
+            const bTime = b.entryTime || 0;
+            return bTime - aTime; // Sort descending
+          });
 
         setBookingHistory(history);
       }
@@ -92,8 +112,6 @@ const Dashboard = () => {
   };
 
   const handleExitComplete = () => {
-    // When exit is complete, set completedBooking from activeBooking
-    console.log("activeBooking ", activeBooking);
     setCompletedBooking(activeBooking);
     setActiveBooking(null);
   };
@@ -137,6 +155,7 @@ const Dashboard = () => {
                   bookingId={completedBooking.id}
                   amount={completedBooking.amount || completedBooking.durationMinutes}
                   durationMinutes={completedBooking.durationMinutes}
+                  onPaymentComplete={handlePaymentComplete}
                 />
               ) : (
                 <ParkingGrid
@@ -171,7 +190,9 @@ const Dashboard = () => {
                     <CardHeader>
                       <CardTitle>Parking Status</CardTitle>
                       <CardDescription>
-                        You don't have any active parking bookings
+                        {activeBooking
+                          ? "Your current parking booking"
+                          : "You don't have any active parking bookings"}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -231,7 +252,7 @@ const Dashboard = () => {
                               </div>
                               <div className="mt-2 flex justify-between items-center text-xs text-muted-foreground">
                                 <span>
-                                  {booking.entryTime?.toDate?.().toLocaleString() || 'N/A'}
+                                  {formatTimestamp(booking.entryTime)}
                                 </span>
                                 <span className={`px-2 py-1 rounded-full ${booking.paymentStatus === 'completed'
                                   ? 'bg-green-500/20 text-green-600'
