@@ -5,8 +5,10 @@ import { Link } from 'react-router-dom';
 import PageContainer from '@/components/layout/PageContainer';
 import ParkingGrid from '@/components/parking/ParkingGrid';
 import { Car, CheckCircle, Clock, CreditCard } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
+  const { currentUser, isAuthenticated } = useAuth();
   return (
     <PageContainer>
       <div className="w-full max-w-7xl mx-auto">
@@ -20,13 +22,14 @@ const Index = () => {
               Book, manage, and pay for parking spaces with just a few clicks
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <Link to="/login">
-              <Button size="lg" className="text-lg">
-                Get Started
-              </Button>
-            </Link>
+            {!isAuthenticated &&
+              (<Link to="/login">
+                <Button size="lg" className="text-lg">
+                  Get Started
+                </Button>
+              </Link>)}
             <a href="#features">
               <Button size="lg" variant="outline" className="text-lg">
                 Learn More
@@ -34,24 +37,24 @@ const Index = () => {
             </a>
           </div>
         </section>
-        
+
         {/* Parking Availability */}
         <section className="py-12 animate-fade-in" style={{ animationDelay: '0.6s' }}>
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold">Live Parking Availability</h2>
             <p className="text-muted-foreground">See which parking slots are currently available</p>
           </div>
-          
+
           <ParkingGrid disableSelection={true} />
         </section>
-        
+
         {/* Features */}
         <section id="features" className="py-12 md:py-20">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold">Why Choose ParkSmart?</h2>
             <p className="text-muted-foreground">Revolutionizing the parking experience</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
@@ -75,8 +78,8 @@ const Index = () => {
                 description: "Once you book a slot, it's yours until you leave. No worries about someone taking your spot."
               },
             ].map((feature, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="glass-card p-6 rounded-xl flex flex-col items-center text-center animate-fade-in"
                 style={{ animationDelay: `${0.2 * index}s` }}
               >
@@ -89,9 +92,9 @@ const Index = () => {
             ))}
           </div>
         </section>
-        
+
         {/* CTA */}
-        <section className="py-12 md:py-20 text-center">
+        {!isAuthenticated && (<section className="py-12 md:py-20 text-center">
           <div className="glass-card p-8 md:p-12 rounded-xl animate-fade-in">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to get started?</h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -110,7 +113,7 @@ const Index = () => {
               </Link>
             </div>
           </div>
-        </section>
+        </section>)}
       </div>
     </PageContainer>
   );

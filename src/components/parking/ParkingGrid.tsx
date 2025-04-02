@@ -39,7 +39,6 @@ const ParkingGrid: React.FC<ParkingGridProps> = ({
 
   useEffect(() => {
     const fetchStatus = async () => {
-      setLoading(true);
 
       try {
         const result = await getParkingStatus();
@@ -68,7 +67,7 @@ const ParkingGrid: React.FC<ParkingGridProps> = ({
     };
 
     fetchStatus();
-    const intervalId = setInterval(fetchStatus, 30000); // Refresh every 30 seconds
+    const intervalId = setInterval(fetchStatus, 5000); // Refresh every 5 seconds
 
     return () => clearInterval(intervalId);
   }, [toast]);

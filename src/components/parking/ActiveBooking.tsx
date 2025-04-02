@@ -35,11 +35,12 @@ const ActiveBooking: React.FC<ActiveBookingProps> = ({ booking, onExit }) => {
       const result = await exitParkingSlot(booking.id);
 
       if (result.success) {
+        onExit();
         toast({
           title: 'Exit successful',
           description: `Your booking has ended. Total amount: $${result.data.amount}`,
         });
-        onExit();
+
       } else {
         toast({
           title: 'Exit failed',

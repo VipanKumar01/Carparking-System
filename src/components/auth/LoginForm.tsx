@@ -22,7 +22,7 @@ const LoginForm = () => {
 
     try {
       const result = await loginUser(email, password);
-      
+
       if (result.success) {
         toast({
           title: 'Welcome back!',

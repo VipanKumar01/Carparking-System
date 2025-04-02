@@ -22,6 +22,8 @@ const Dashboard = () => {
   const [completedBooking, setCompletedBooking] = useState<any>(null);
   const [bookingHistory, setBookingHistory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [standupDuration, setStandupDuration] = useState(Number);
+  const [standupAmount, setStandupAmount] = useState(Number);
   const { currentUser, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -37,7 +39,7 @@ const Dashboard = () => {
 
     // If it's a Firebase server timestamp object
     if (typeof timestamp === 'object' && timestamp.hasOwnProperty('seconds')) {
-      return new Date(timestamp.seconds * 1000).toLocaleString();
+      return new Date(timestamp?.seconds * 1000).toLocaleString();
     }
 
     // If it's a regular timestamp number
@@ -48,27 +50,55 @@ const Dashboard = () => {
     return 'N/A';
   };
 
+  const calculateAmountAndDuration = (entryTime: any) => {
+    const entryDate = new Date(entryTime?.seconds * 1000); // Convert Firebase timestamp to Date
+    const now = new Date(); // Current time
+
+    // Calculate the duration in milliseconds
+    const durationMs = now.getTime() - entryDate.getTime();
+
+    // Convert the duration to minutes
+    const durationMinutes = Math.floor(durationMs / (1000 * 60));
+
+    // Calculate amount ($1 per minute)
+    const amount = durationMinutes;
+
+    return {
+      durationMinutes,
+      amount
+    };
+  };
+
+  const fetchBookingTime = async () => {
+    const activeResult = await getActiveBooking(currentUser.uid);
+
+    const { durationMinutes, amount } = calculateAmountAndDuration(activeResult?.data?.entryTime);
+    console.log('Duration in minutes:', durationMinutes);
+    console.log('Amount: $', amount);
+    setStandupDuration(durationMinutes);
+    setStandupAmount(amount);
+
+    if (activeResult.success) {
+      setActiveBooking(activeResult.data);
+    }
+  }
+
   const fetchData = async () => {
     if (!currentUser) return;
 
     setIsLoading(true);
 
     try {
-      // Get active booking
       const activeResult = await getActiveBooking(currentUser.uid);
-
+      fetchBookingTime();
       if (activeResult.success) {
         setActiveBooking(activeResult.data);
-      } else if (activeResult.error) {
-        toast({
-          title: 'Error',
-          description: activeResult.error,
-          variant: 'destructive',
-        });
       }
+
 
       // Get booking history
       const historyResult = await getUserBookings(currentUser.uid);
+      console.log("historyResult==>>", historyResult.data);
 
       if (historyResult.success) {
         // Filter out active bookings and sort by entry time descending
@@ -153,8 +183,8 @@ const Dashboard = () => {
               completedBooking ? (
                 <PaymentForm
                   bookingId={completedBooking.id}
-                  amount={completedBooking.amount || completedBooking.durationMinutes}
-                  durationMinutes={completedBooking.durationMinutes}
+                  amount={standupAmount}
+                  durationMinutes={standupDuration}
                   onPaymentComplete={handlePaymentComplete}
                 />
               ) : (

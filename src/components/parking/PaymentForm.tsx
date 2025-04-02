@@ -45,7 +45,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           title: 'Payment successful',
           description: 'Thank you for your payment!',
         });
-        navigate('/dashboard', { replace: true });
+        navigate('/', { replace: true });
       } else {
         toast({
           title: 'Payment failed',
